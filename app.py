@@ -72,7 +72,7 @@ def user_input(user_question):
 
 def main():
     streamlit.set_page_config("Rajan's Chat with Multiple PDF")
-    streamlit.header("Rajan's Chat with Multiple PDF using Gemini💁")
+    streamlit.header("Rajan's Multi-PDF Chat feat. Gemini💁")
 
     user_question = streamlit.text_input("Ask a Question from the PDF Files")
 
