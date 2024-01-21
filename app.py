@@ -29,7 +29,7 @@ def get_pdf_text(pdf_docs):
 
 # split the complete text string into smaller chunks
 def get_text_chunks(text):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=400)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=250)
     chunks=text_splitter.split_text(text)
     return chunks
 
@@ -49,7 +49,36 @@ def get_conversational_chain():
     Question: \n{question}\n
 
     Answer:"""
-    model =ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.3)
+
+    #added to centralize the model settings 
+    # Set up the model
+    generation_config = {
+    "temperature": 0.4,
+    "top_p": 1,
+    "top_k": 1,
+    "max_output_tokens": 2048,
+    }
+
+    safety_settings = [
+    {
+        "category": "HARM_CATEGORY_HARASSMENT",
+        "threshold": "BLOCK_NONE"
+    },
+    {
+        "category": "HARM_CATEGORY_HATE_SPEECH",
+        "threshold": "BLOCK_NONE"
+    },
+    {
+        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        "threshold": "BLOCK_NONE"
+    },
+    {
+        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+        "threshold": "BLOCK_NONE"
+    }
+    ]
+
+    model =ChatGoogleGenerativeAI(model="gemini-pro", generation_config=generation_config,safety_settings=safety_settings)
     prompt=PromptTemplate(template=prompt_template, input_variables=["context","question"])
 
     chain=load_qa_chain(model, chain_type="stuff", prompt=prompt)
@@ -59,6 +88,34 @@ def get_conversational_chain():
 #this is  the question and answer section. First load the local database and 
 def user_input(user_question):
     embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
+
+    #added to centralize the model settings 
+    # Set up the model
+    generation_config = {
+    "temperature": 0.4,
+    "top_p": 1,
+    "top_k": 1,
+    "max_output_tokens": 2048,
+    }
+
+    safety_settings = [
+    {
+        "category": "HARM_CATEGORY_HARASSMENT",
+        "threshold": "BLOCK_NONE"
+    },
+    {
+        "category": "HARM_CATEGORY_HATE_SPEECH",
+        "threshold": "BLOCK_NONE"
+    },
+    {
+        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        "threshold": "BLOCK_NONE"
+    },
+    {
+        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+        "threshold": "BLOCK_NONE"
+    }
+    ]
 
     new_db = FAISS.load_local("faiss_index", embeddings)
     docs = new_db.similarity_search(user_question)
@@ -72,7 +129,7 @@ def user_input(user_question):
 
 def main():
     streamlit.set_page_config("Rajan's Chat with Multiple PDF")
-    streamlit.header("Rajan's Multi-PDF Chat feat. Gemini💁")
+    streamlit.header("Rajan's Multi-PDF Chat ft. Google Gemini-Pro💁")
 
     user_question = streamlit.text_input("Ask a Question from the PDF Files")
 
